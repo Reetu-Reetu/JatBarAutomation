@@ -121,4 +121,34 @@ public String getContactEnquiryValue() {
             By.cssSelector("form.contact-form #query")
     ).getAttribute("value");
 }
+
+public void enterContactPhone(String phone) {
+    driver.findElement(
+            By.cssSelector("form.contact-form #phone")
+    ).sendKeys(phone);
+}
+
+public void agreeToPrivacyNotice() {
+    By checkboxLocator = By.id("privacyConsent");
+    WebElement checkbox = driver.findElement(checkboxLocator);
+
+    ((JavascriptExecutor) driver).executeScript(
+            "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});",
+            checkbox
+    );
+
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(checkboxLocator))
+            .click();
+}
+
+public boolean isPrivacyNoticeSelected() {
+    return driver.findElement(By.id("privacyConsent")).isSelected();
+}
+
+public boolean isPrivacyNoticeErrorDisplayed() {
+    return driver.findElements(By.id("privacyConsent-error"))
+            .stream()
+            .anyMatch(WebElement::isDisplayed);
+}
 }

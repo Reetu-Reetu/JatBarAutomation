@@ -334,4 +334,64 @@ public void verifyEnquiryStopsAtOneThousandCharacters() {
             "Enquiry field should accept no more than 1,000 characters"
     );
 }
+
+@Test
+public void verifyInvalidPhoneShowsValidationError() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form #phone")
+    ));
+
+    homePage.enterContactPhone("abcd");
+    homePage.submitContactForm();
+
+    String expectedError = "Enter a valid telephone number.";
+
+    wait.until(webDriver ->
+            homePage.getContactFormText().contains(expectedError)
+    );
+
+    Assert.assertTrue(
+            homePage.getContactFormText().contains(expectedError),
+            "Invalid telephone number error is missing"
+    );
+}
+
+@Test
+public void verifyPrivacyConsentClearsItsValidationError() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    homePage.agreeToPrivacyNotice();
+
+    Assert.assertTrue(
+            homePage.isPrivacyNoticeSelected(),
+            "Privacy checkbox was not selected"
+    );
+
+    homePage.submitContactForm();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    // Other fields are empty, so validation runs without sending an enquiry.
+    wait.until(webDriver ->
+            homePage.getContactFormText()
+                    .contains("Email address is required.")
+    );
+
+    Assert.assertFalse(
+            homePage.isPrivacyNoticeErrorDisplayed(),
+            "Privacy notice error appeared despite consent being selected"
+    );
+}
 }
