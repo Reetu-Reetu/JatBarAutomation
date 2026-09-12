@@ -5,6 +5,7 @@ import com.jatbar.pages.HomePage;
 
 import java.time.Duration;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -126,4 +127,127 @@ public class HomePageTest extends BaseTest {
                         + driver.getCurrentUrl()
         );
     }
+
+    @Test
+public void verifyContactFormDisplayed() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.urlContains("#contact"));
+
+    boolean formDisplayed = wait.until(
+            webDriver -> homePage.isContactFormDisplayed()
+    );
+
+    Assert.assertTrue(
+            formDisplayed,
+            "Contact form is not displayed after clicking Contact"
+    );
+}
+
+@Test
+public void verifyContactFormFieldsDisplayed() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form")
+    ));
+
+    String[] fieldIds = {
+            "firstName", "lastName", "email", "phone", "query"
+    };
+
+    for (String fieldId : fieldIds) {
+        Assert.assertTrue(
+                homePage.isContactFieldDisplayed(fieldId),
+                "Contact form field is not displayed: " + fieldId
+        );
+    }
+}
+
+
+@Test
+public void verifyEmptyContactFormShowsValidationErrors() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form")
+    ));
+
+    homePage.submitContactForm();
+
+    wait.until(webDriver ->
+            homePage.getContactFormText()
+                    .contains("Email address is required.")
+    );
+
+    String formText = homePage.getContactFormText();
+
+    Assert.assertTrue(
+            formText.contains("Email address is required."),
+            "Email required message is missing"
+    );
+
+    Assert.assertTrue(
+            formText.contains("Telephone number is required."),
+            "Telephone required message is missing"
+    );
+
+    Assert.assertTrue(
+            formText.contains("Please briefly explain your requirements."),
+            "Enquiry required message is missing"
+    );
+
+    Assert.assertTrue(
+            formText.contains("You must agree to the privacy notice."),
+            "Privacy notice required message is missing"
+    );
+}
+
+
+@Test
+public void verifyInvalidEmailShowsValidationError() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form #email")
+    ));
+
+    homePage.enterContactEmail("not-an-email");
+    homePage.submitContactForm();
+
+    wait.until(webDriver ->
+            homePage.getContactFormText()
+                    .contains("Enter a valid email address.")
+    );
+
+    Assert.assertTrue(
+            homePage.getContactFormText()
+                    .contains("Enter a valid email address."),
+            "Invalid email validation message is missing"
+    );
+}
 }

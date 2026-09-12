@@ -1,7 +1,14 @@
 package com.jatbar.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+import java.time.Duration;
 
 public class HomePage {
 
@@ -24,9 +31,12 @@ public class HomePage {
             By.cssSelector("a[href='#contact']");
 
     // Contact form
-    private By contactForm =
-            By.cssSelector("#contact-form");
+   private By contactForm = By.cssSelector("form.contact-form");
 
+
+   public boolean isContactFieldDisplayed(String fieldId) {
+    return driver.findElement(By.id(fieldId)).isDisplayed();
+}
     // Constructor
     public HomePage(WebDriver driver) {
         this.driver = driver;
@@ -70,4 +80,34 @@ public class HomePage {
                 && driver.findElement(servicesLink).isDisplayed()
                 && driver.findElement(contactLink).isDisplayed();
     }
+
+    public void submitContactForm() {
+    By submitButton = By.cssSelector(
+            "form.contact-form button[type='submit']"
+    );
+
+    WebElement button = driver.findElement(submitButton);
+
+    ((JavascriptExecutor) driver).executeScript(
+            "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});",
+            button
+    );
+
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(submitButton))
+            .click();
+}
+
+public String getContactFormText() {
+    return driver.findElement(
+            By.cssSelector("form.contact-form")
+    ).getText();
+}
+
+public void enterContactEmail(String email) {
+    driver.findElement(
+            By.cssSelector("form.contact-form #email")
+    ).sendKeys(email);
+}
+
 }
