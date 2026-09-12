@@ -1,154 +1,134 @@
 package com.jatbar.pages;
 
+import java.time.Duration;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.Test;
-
-import java.time.Duration;
 
 public class HomePage {
 
-    private WebDriver driver;
+    private final WebDriver driver;
 
-    private final String url =
+    private static final String URL =
             "https://jat-mobile-bar-website.vercel.app/";
 
-    // Navigation locators
-    private By homeLink =
-            By.cssSelector("a[href='#home']");
+    private final By homeLink = By.cssSelector("a[href='#home']");
+    private final By aboutLink = By.cssSelector("a[href='#about']");
+    private final By servicesLink = By.cssSelector("a[href='#services']");
+    private final By contactLink = By.cssSelector("a[href='#contact']");
 
-    private By aboutLink =
-            By.cssSelector("a[href='#about']");
+    private final By contactForm =
+            By.cssSelector("form.contact-form");
+    private final By submitButton =
+            By.cssSelector("form.contact-form button[type='submit']");
+    private final By emailField =
+            By.cssSelector("form.contact-form #email");
+    private final By phoneField =
+            By.cssSelector("form.contact-form #phone");
+    private final By enquiryField =
+            By.cssSelector("form.contact-form #query");
+    private final By privacyCheckbox =
+            By.cssSelector("form.contact-form #privacyConsent");
+    private final By privacyError =
+            By.id("privacyConsent-error");
 
-    private By servicesLink =
-            By.cssSelector("a[href='#services']");
-
-    private By contactLink =
-            By.cssSelector("a[href='#contact']");
-
-    // Contact form
-   private By contactForm = By.cssSelector("form.contact-form");
-
-
-   public boolean isContactFieldDisplayed(String fieldId) {
-    return driver.findElement(By.id(fieldId)).isDisplayed();
-}
-    // Constructor
     public HomePage(WebDriver driver) {
         this.driver = driver;
     }
 
-    // Open website
     public void open() {
-        driver.get(url);
+        driver.get(URL);
     }
 
-    // Get page title
     public String getPageTitle() {
         return driver.getTitle();
     }
 
-    // Click About
     public void clickAbout() {
         driver.findElement(aboutLink).click();
     }
 
-    // Click Services
     public void clickServices() {
         driver.findElement(servicesLink).click();
     }
 
-    // Click Contact
     public void clickContact() {
-        driver.findElement(contactLink).click();
-    }
+    new WebDriverWait(driver, Duration.ofSeconds(10))
+            .until(ExpectedConditions.elementToBeClickable(contactLink))
+            .click();
+}
 
-    // Verify Contact form
-    public boolean isContactFormDisplayed() {
-        return driver.findElement(contactForm).isDisplayed();
-    }
-
-    // Verify navigation links are displayed
     public boolean isNavigationDisplayed() {
-
         return driver.findElement(homeLink).isDisplayed()
                 && driver.findElement(aboutLink).isDisplayed()
                 && driver.findElement(servicesLink).isDisplayed()
                 && driver.findElement(contactLink).isDisplayed();
     }
 
+    public boolean isContactFormDisplayed() {
+        return driver.findElement(contactForm).isDisplayed();
+    }
+
+    public boolean isContactFieldDisplayed(String fieldId) {
+        By field = By.cssSelector(
+                "form.contact-form [id='" + fieldId + "']"
+        );
+        return driver.findElement(field).isDisplayed();
+    }
+
+    public void enterContactEmail(String email) {
+        driver.findElement(emailField).sendKeys(email);
+    }
+
+    public void enterContactPhone(String phone) {
+        driver.findElement(phoneField).sendKeys(phone);
+    }
+
+    public void enterContactEnquiry(String enquiry) {
+        driver.findElement(enquiryField).sendKeys(enquiry);
+    }
+
+    public String getContactEnquiryValue() {
+        return driver.findElement(enquiryField).getAttribute("value");
+    }
+
+    public String getContactFormText() {
+        return driver.findElement(contactForm).getText();
+    }
+
     public void submitContactForm() {
-    By submitButton = By.cssSelector(
-            "form.contact-form button[type='submit']"
-    );
+        scrollToAndClick(submitButton);
+    }
 
-    WebElement button = driver.findElement(submitButton);
+    public void agreeToPrivacyNotice() {
+        scrollToAndClick(privacyCheckbox);
+    }
 
-    ((JavascriptExecutor) driver).executeScript(
-            "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});",
-            button
-    );
+    public boolean isPrivacyNoticeSelected() {
+        return driver.findElement(privacyCheckbox).isSelected();
+    }
 
-    new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.elementToBeClickable(submitButton))
-            .click();
-}
+    public boolean isPrivacyNoticeErrorDisplayed() {
+        return driver.findElements(privacyError)
+                .stream()
+                .anyMatch(WebElement::isDisplayed);
+    }
 
-public String getContactFormText() {
-    return driver.findElement(
-            By.cssSelector("form.contact-form")
-    ).getText();
-}
+    private void scrollToAndClick(By locator) {
+        WebElement element = driver.findElement(locator);
 
-public void enterContactEmail(String email) {
-    driver.findElement(
-            By.cssSelector("form.contact-form #email")
-    ).sendKeys(email);
-}
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView(" +
+                "{block: 'center', behavior: 'instant'});",
+                element
+        );
 
-public void enterContactEnquiry(String enquiry) {
-    driver.findElement(
-            By.cssSelector("form.contact-form #query")
-    ).sendKeys(enquiry);
-}
-
-public String getContactEnquiryValue() {
-    return driver.findElement(
-            By.cssSelector("form.contact-form #query")
-    ).getAttribute("value");
-}
-
-public void enterContactPhone(String phone) {
-    driver.findElement(
-            By.cssSelector("form.contact-form #phone")
-    ).sendKeys(phone);
-}
-
-public void agreeToPrivacyNotice() {
-    By checkboxLocator = By.id("privacyConsent");
-    WebElement checkbox = driver.findElement(checkboxLocator);
-
-    ((JavascriptExecutor) driver).executeScript(
-            "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});",
-            checkbox
-    );
-
-    new WebDriverWait(driver, Duration.ofSeconds(10))
-            .until(ExpectedConditions.elementToBeClickable(checkboxLocator))
-            .click();
-}
-
-public boolean isPrivacyNoticeSelected() {
-    return driver.findElement(By.id("privacyConsent")).isSelected();
-}
-
-public boolean isPrivacyNoticeErrorDisplayed() {
-    return driver.findElements(By.id("privacyConsent-error"))
-            .stream()
-            .anyMatch(WebElement::isDisplayed);
-}
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(locator))
+                .click();
+    }
 }
