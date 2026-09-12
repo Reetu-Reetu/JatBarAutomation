@@ -110,4 +110,15 @@ public void enterContactEmail(String email) {
     ).sendKeys(email);
 }
 
+public void enterContactEnquiry(String enquiry) {
+    driver.findElement(
+            By.cssSelector("form.contact-form #query")
+    ).sendKeys(enquiry);
+}
+
+public String getContactEnquiryValue() {
+    return driver.findElement(
+            By.cssSelector("form.contact-form #query")
+    ).getAttribute("value");
+}
 }

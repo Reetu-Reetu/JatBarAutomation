@@ -250,4 +250,88 @@ public void verifyInvalidEmailShowsValidationError() {
             "Invalid email validation message is missing"
     );
 }
+
+@Test
+public void verifyShortEnquiryShowsValidationError() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form #query")
+    ));
+
+    homePage.enterContactEnquiry("123456789"); // 9 characters
+    homePage.submitContactForm();
+
+    String expectedError =
+            "Your enquiry must contain at least 10 characters.";
+
+    wait.until(webDriver ->
+            homePage.getContactFormText().contains(expectedError)
+    );
+
+    Assert.assertTrue(
+            homePage.getContactFormText().contains(expectedError),
+            "Minimum enquiry length error is missing"
+    );
+}
+@Test
+public void verifyTenCharacterEnquiryPassesLengthValidation() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form #query")
+    ));
+
+    homePage.enterContactEnquiry("1234567890"); // Exactly 10 characters
+    homePage.submitContactForm();
+
+    // Confirms validation has run while the form remains unsubmitted.
+    wait.until(webDriver ->
+            homePage.getContactFormText()
+                    .contains("Email address is required.")
+    );
+
+    Assert.assertFalse(
+            homePage.getContactFormText().contains(
+                    "Your enquiry must contain at least 10 characters."
+            ),
+            "A valid 10-character enquiry was rejected as too short"
+    );
+}
+
+@Test
+public void verifyEnquiryStopsAtOneThousandCharacters() {
+
+    HomePage homePage = new HomePage(driver);
+    homePage.open();
+    homePage.clickContact();
+
+    WebDriverWait wait =
+            new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("form.contact-form #query")
+    ));
+
+    String enquiry = "a".repeat(1001);
+    homePage.enterContactEnquiry(enquiry);
+
+    Assert.assertEquals(
+            homePage.getContactEnquiryValue().length(),
+            1000,
+            "Enquiry field should accept no more than 1,000 characters"
+    );
+}
 }
